@@ -11,7 +11,6 @@ import org.testng.Assert;
 import org.testng.asserts.SoftAssert;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Locale;
 
 public class FormsPage extends BasePage {
@@ -40,11 +39,11 @@ public class FormsPage extends BasePage {
     @FindBy(id = "submit")
     private WebElement submitBtn;
 
-    @FindBy(css = ".react-datepicker__current-month--hasMonthDropdown")
-    private List<WebElement> calendarMonthTitles;
+    @FindBy(css = ".react-datepicker__month-select")
+    private WebElement monthDropdown;
 
-    @FindBy(xpath = "//button[@aria-label=\"Previous Month\"]")
-    private WebElement calendarPrevBtn;
+    @FindBy(css = ".react-datepicker__year-select")
+    private WebElement yearDropdown;
 
     @FindBy(id = "state")
     private WebElement stateDropdown;
@@ -116,27 +115,43 @@ public class FormsPage extends BasePage {
 
     public void setDateOfBirth(String dateOfBirth) {
         System.out.println("- Date of Birth: " + dateOfBirth);
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
         LocalDate date = LocalDate.parse(dateOfBirth, formatter);
-        String day = String.valueOf(date.getDayOfMonth());
-        String monthYear = date.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH));
 
+        int year = date.getYear();
+        String month = date.getMonth().name().substring(0, 1) +
+                date.getMonth().name().substring(1).toLowerCase();
+
+        String day = String.valueOf(date.getDayOfMonth());
         dateOfBirthField.click();
 
-        while (!getCalendarMonthTitleTxt().contains(monthYear)) {
-            calendarPrevBtn.click();
-        }
-        WebElement dayElement = getDate(day);
-        smallWait.until(ExpectedConditions.elementToBeClickable(dayElement)).click();
+        selectYear(year);
+        selectMonth(month);
+        selectDay(day);
     }
 
-    public String getCalendarMonthTitleTxt() {
-        return calendarMonthTitles.get(0).getText();
+    public void selectYear(int year) {
+        mediumWait.until(ExpectedConditions.elementToBeClickable(yearDropdown)).click();
+        WebElement yearOption = driver.findElement(By.xpath(
+                String.format("//select[contains(@class,'year-select')]/option[@value='%d']", year)
+        ));
+        yearOption.click();
     }
 
-    public WebElement getDate(String day) {
-        return driver.findElement(By.xpath("//div[contains(@class,'react-datepicker__day') " +
-                "and text()='" + day + "']"));
+    public void selectMonth(String month) {
+        mediumWait.until(ExpectedConditions.elementToBeClickable(monthDropdown)).click();
+        WebElement monthOption = driver.findElement(By.xpath(
+                String.format("//select[contains(@class,'month-select')]/option[text()='%s']", month)
+        ));
+        monthOption.click();
+    }
+
+    public void selectDay(String day) {
+        WebElement dayElement = driver.findElement(By.xpath(
+                String.format("//div[contains(@class,'react-datepicker__day') and text()='%s']", day)
+        ));
+        mediumWait.until(ExpectedConditions.elementToBeClickable(dayElement)).click();
     }
 
     public void selectSubject(String subject) {
@@ -198,9 +213,7 @@ public class FormsPage extends BasePage {
             default:
                 throw new IllegalArgumentException("The city \"" + city + "\" is not in the list!");
         }
-
         removeAds();
-
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", stateDropdown);
 
         stateDropdown.click();
@@ -269,21 +282,15 @@ public class FormsPage extends BasePage {
     }
 
     public void validateRequiredFieldsErrors() {
-
         SoftAssert soft = new SoftAssert();
-
         soft.assertTrue(isFieldMarkedAsError("firstName"),
                 "First Name is empty.");
-
         soft.assertTrue(isFieldMarkedAsError("lastName"),
                 "Last Name is empty.");
-
         soft.assertTrue(isFieldMarkedAsError("gender"),
                 "Gender is empty.");
-
         soft.assertTrue(isFieldMarkedAsError("mobile"),
                 "Mobile Number is empty.");
-
         soft.assertAll();
     }
 }
