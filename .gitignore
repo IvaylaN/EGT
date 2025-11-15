@@ -1,4 +1,17 @@
-*.iml
+# IntelliJ
 .idea/
-out/
+*.iml
+
+# Maven
 target/
+
+# Logs
+*.log
+
+# Allure reports
+allure-results/
+allure-report/
+
+# OS files
+.DS_Store
+Thumbs.db
