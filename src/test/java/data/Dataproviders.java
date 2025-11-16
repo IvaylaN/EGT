@@ -1,4 +1,4 @@
-package UITest.pages.tests;
+package data;
 
 import com.github.javafaker.Faker;
 import org.testng.annotations.DataProvider;
@@ -25,13 +25,11 @@ public class Dataproviders {
         };
     }
 
-    private final Faker faker = new Faker();
 
     @DataProvider(name = "getDataWithFaker")
     public Object[][] getDataWithFaker() {
-
+        Faker faker = new Faker();
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", java.util.Locale.ENGLISH);
-
         return new Object[][]{
                 {
                         faker.name().firstName(),

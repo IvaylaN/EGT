@@ -1,8 +1,8 @@
-package UITest.pages.tests;
+package UI_test.tests;
 
-import UITest.pages.pages.FormsPage;
-import UITest.pages.pages.HomePage;
-import UITest.pages.pages.ValidatePage;
+import UI_test.pages.FormsPage;
+import UI_test.pages.HomePage;
+import UI_test.pages.ValidatePage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.Allure;
 import org.openqa.selenium.OutputType;
@@ -16,10 +16,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
+
 import java.io.ByteArrayInputStream;
 import java.util.concurrent.TimeUnit;
 
 public class BaseTestMethods {
+
     protected WebDriver driver;
     protected HomePage homePage;
     protected FormsPage formsPage;
@@ -28,13 +30,12 @@ public class BaseTestMethods {
 
     @BeforeMethod
     @Parameters({"browser", "env"})
-    public void setUp(@Optional("chrome") String browser, @Optional("dev") String env) {
+    public void setUp(@Optional("chrome") String browser, @Optional("default") String env) {
         driver = initDriver(browser);
         //cleanDirectory(SCREENSHOT_DIR);
         //cleanDirectory(REPORT_DIR);
         driver.manage().window().maximize();
         driver.get(getBaseUrl(env));
-        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
 
         homePage = new HomePage(driver);
@@ -62,6 +63,7 @@ public class BaseTestMethods {
             case "test":
                 return "https://test.demoqa.com/";
             case "dev":
+                return "https://demoqa.com/";
             default:
                 return "https://demoqa.com/";
         }

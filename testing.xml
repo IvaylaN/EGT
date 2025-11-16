@@ -3,12 +3,12 @@
 <suite name="UI Automation Suite" verbose="1" parallel="false">
 
     <parameter name="browser" value="chrome"/>
-    <parameter name="env" value="dev"/>
+    <parameter name="env" value=""/>
 
     <test name="Regression Tests">
         <classes>
-            <class name="UITest.pages.tests.validatePracticeForm"></class>
-
+            <class name="UI_test.tests.validatePracticeForm"></class>
+            <class name="API_test.createUser"></class>
         </classes>
     </test>
 </suite>

@@ -1,10 +1,12 @@
-package UITest.pages.pages;
+package UI_test.pages;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+
 import java.time.Duration;
 
 public class BasePage {
@@ -43,7 +45,24 @@ public class BasePage {
 
     protected void checkFieldValue(WebElement element, String text) {
         String actual = element.getAttribute("value");
-        Assert.assertEquals(actual, text, "Field value do no match.");
+        Assert.assertEquals(actual, text, "Field value do no match, expected." + text + "but found " + actual);
+    }
+
+    protected void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript
+                ("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element);
+    }
+
+    protected void disableAds() {
+        try {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            String script =
+                    "document.querySelectorAll('#fixedban, footer, iframe, [id^=\"google_ads\"], [id^=\"ad\"]')" +
+                            ".forEach(el => el.remove());";
+
+            js.executeScript(script);
+        } catch (Exception ignored) {
+        }
     }
 }
 

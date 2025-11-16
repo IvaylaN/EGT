@@ -1,4 +1,4 @@
-package UITest.pages.pages;
+package UI_test.pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
@@ -8,6 +8,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -33,7 +34,7 @@ public class ValidatePage extends BasePage {
 
     public void checkModal() {
         Assert.assertTrue(isModalOpen(), "Modal did not open.");
-        verifyModal();
+        verifyModalTitle();
     }
 
     public boolean isModalOpen() {
@@ -45,7 +46,7 @@ public class ValidatePage extends BasePage {
         }
     }
 
-    public void verifyModal() {
+    public void verifyModalTitle() {
         String titleText = mediumWait.until(ExpectedConditions.visibilityOf(modalTitle)).getText().trim();
         Assert.assertEquals(titleText, "Thanks for submitting the form", "Title is not correct");
     }

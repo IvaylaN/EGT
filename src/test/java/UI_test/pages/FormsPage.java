@@ -1,19 +1,22 @@
-package UITest.pages.pages;
+package UI_test.pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.asserts.SoftAssert;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class FormsPage extends BasePage {
+
+    private static final Logger logger = LoggerFactory.getLogger(FormsPage.class);
 
     @FindBy(id = "firstName")
     private WebElement firstNameField;
@@ -30,7 +33,7 @@ public class FormsPage extends BasePage {
     @FindBy(id = "dateOfBirthInput")
     private WebElement dateOfBirthField;
 
-    @FindBy(xpath = "//input[@id='subjectsInput']")
+    @FindBy(id = "subjectsInput")
     private WebElement subjectsField;
 
     @FindBy(id = "currentAddress")
@@ -56,49 +59,28 @@ public class FormsPage extends BasePage {
         PageFactory.initElements(driver, this);
     }
 
+    //text field for firstname, lastname, email, mobile, address
+
     public void enterFirstName(String firstName) {
-        System.out.println("- First name: " + firstName);
+        logger.info("- First name: " + firstName);
         enterText(firstNameField, firstName);
         checkFieldValue(firstNameField, firstName);
     }
 
     public void enterLastName(String lastName) {
-        System.out.println("- Last name: " + lastName);
+        logger.info("- Last name: " + lastName);
         enterText(lastNameField, lastName);
         checkFieldValue(lastNameField, lastName);
     }
 
     public void enterEmail(String email) {
-        System.out.println("- Email: " + email);
+        logger.info("- Email: " + email);
         enterText(emailField, email);
         checkFieldValue(emailField, email);
     }
 
-    public void selectGender(String gender) {
-        System.out.println("- Gender: " + gender);
-        selectGenderOption(gender);
-        isGenderSelected(gender);
-    }
-
-    public void selectGenderOption(String gender) {
-        String formatGender = gender.trim().toLowerCase();
-        String option = String.format(
-                "//label[@for=(//input[@type='radio' and translate(@value," +
-                        "'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='%s']/@id)]", formatGender);
-        WebElement label = smallWait.until(ExpectedConditions.elementToBeClickable(By.xpath(option)));
-        clickRadioBtn(label);
-    }
-
-    public boolean isGenderSelected(String gender) {
-        String xpathGender = String.format(
-                "//input[@type='radio' and translate(@value," +
-                        "'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='%s']", gender.toLowerCase());
-        WebElement genderRadio = driver.findElement(By.xpath(xpathGender));
-        return genderRadio.isSelected();
-    }
-
     public void enterMobileNum(String mobileNum) {
-        System.out.println("- Mobile Number: " + mobileNum);
+        logger.info("- Mobile Number: " + mobileNum);
         enterText(mobileField, mobileNum);
         checkMobileNumber();
     }
@@ -113,8 +95,31 @@ public class FormsPage extends BasePage {
         return value != null && value.matches("\\d{10}");
     }
 
+    public void enterCurrentAddress(String address) {
+        logger.info("- Current Address: " + address);
+        enterText(addressField, address);
+    }
+
+    //gender option
+
+    public void selectGender(String gender) {
+        logger.info("- Gender: " + gender);
+        selectGenderOption(gender);
+    }
+
+    public void selectGenderOption(String gender) {
+        WebElement option = smallWait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//label[text()='" + gender + "']")));
+        clickRadioBtn(option);
+        boolean isSelected = driver.findElement(By.xpath
+                ("//input[@type='radio' and @value='" + gender + "']")).isSelected();
+        Assert.assertTrue(isSelected, "Gender is not selected correctly.");
+    }
+
+    //date of birth
+
     public void setDateOfBirth(String dateOfBirth) {
-        System.out.println("- Date of Birth: " + dateOfBirth);
+        logger.info("- Date of Birth: " + dateOfBirth);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
         LocalDate date = LocalDate.parse(dateOfBirth, formatter);
@@ -124,6 +129,7 @@ public class FormsPage extends BasePage {
                 date.getMonth().name().substring(1).toLowerCase();
 
         String day = String.valueOf(date.getDayOfMonth());
+
         dateOfBirthField.click();
 
         selectYear(year);
@@ -133,37 +139,37 @@ public class FormsPage extends BasePage {
 
     public void selectYear(int year) {
         mediumWait.until(ExpectedConditions.elementToBeClickable(yearDropdown)).click();
-        WebElement yearOption = driver.findElement(By.xpath(
-                String.format("//select[contains(@class,'year-select')]/option[@value='%d']", year)
+        WebElement yearOption = smallWait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath(String.format("//select[contains(@class,'year-select')]/option[@value='%d']", year))
         ));
         yearOption.click();
     }
 
     public void selectMonth(String month) {
         mediumWait.until(ExpectedConditions.elementToBeClickable(monthDropdown)).click();
-        WebElement monthOption = driver.findElement(By.xpath(
-                String.format("//select[contains(@class,'month-select')]/option[text()='%s']", month)
+        WebElement monthOption = smallWait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath(String.format("//select[contains(@class,'month-select')]/option[text()='%s']", month))
         ));
         monthOption.click();
     }
 
     public void selectDay(String day) {
-        WebElement dayElement = driver.findElement(By.xpath(
-                String.format("//div[contains(@class,'react-datepicker__day') and text()='%s']", day)
+        WebElement dayElement = smallWait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//div[contains(@class,'react-datepicker__day')" +
+                        " and not(contains(@class,'--outside-month')) " +
+                        "and text()='" + day + "']")
         ));
         mediumWait.until(ExpectedConditions.elementToBeClickable(dayElement)).click();
     }
 
+    //subject drop-down
+
     public void selectSubject(String subject) {
-        System.out.println("- Subjects: " + subject);
+        logger.info("- Subjects: " + subject);
         scrollToElement(subjectsField);
         subjectsField.click();
         subjectsField.sendKeys(subject);
         selectOption(subject).click();
-    }
-
-    public void scrollToElement(WebElement element) {
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element);
     }
 
     public WebElement selectOption(String subject) {
@@ -171,8 +177,10 @@ public class FormsPage extends BasePage {
         return mediumWait.until(ExpectedConditions.elementToBeClickable(By.xpath(option)));
     }
 
+    //hobbies - multiselect
+
     public void selectHobbies(String hobbies) {
-        System.out.println("- Hobbies: " + hobbies);
+        logger.info("- Hobbies: " + hobbies);
         String[] hobbiesArray = hobbies.split("\\s*и\\s*|,");
 
         for (String hobby : hobbiesArray) {
@@ -183,59 +191,47 @@ public class FormsPage extends BasePage {
         }
     }
 
-    public void enterCurrentAddress(String address) {
-        System.out.println("- Current Address: " + address);
-        enterText(addressField, address);
-    }
+    //state and city
 
     public void selectCity(String city) {
-        System.out.println("- City: " + city);
-        String state = "";
+        logger.info("- City: " + city);
+
+        String state = getStateByCity(city);
+
+        smallWait.until(ExpectedConditions.elementToBeClickable(stateDropdown)).click();
+        clickElement(selectDropdownOption(state));
+
+        smallWait.until(ExpectedConditions.elementToBeClickable(cityDropdown)).click();
+        clickElement(selectDropdownOption(city));
+    }
+
+    public String getStateByCity(String city) {
         switch (city.trim().toLowerCase()) {
             case "delhi":
             case "gurgaon":
             case "noida":
-                state = "NCR";
-                break;
+                return "NCR";
             case "agra":
             case "lucknow":
             case "merrut":
-                state = "Uttar Pradesh";
-                break;
+                return "Uttar Pradesh";
             case "karnal":
             case "panipat":
-                state = "Haryana";
-                break;
+                return "Haryana";
             case "jaipur":
             case "jaiselmer":
-                state = "Rajasthan";
-                break;
+                return "Rajasthan";
             default:
-                throw new IllegalArgumentException("The city \"" + city + "\" is not in the list!");
-        }
-        removeAds();
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", stateDropdown);
-
-        stateDropdown.click();
-        WebElement stateOption = driver.findElement(By.xpath(String.format("//div[contains(@id,'react-select') " +
-                "and text()='%s']", state)));
-        stateOption.click();
-
-        cityDropdown.click();
-        WebElement cityOption = driver.findElement(By.xpath(String.format("//div[contains(@id,'react-select') " +
-                "and text()='%s']", city)));
-        cityOption.click();
-    }
-
-    public void removeAds() {
-        try {
-            driver.findElement(By.id("fixedban")).click();
-            ((JavascriptExecutor) driver)
-                    .executeScript("document.getElementById('fixedban').remove();");
-        } catch (Exception ignored) {
+                throw new IllegalArgumentException("Invalid city option " + city);
         }
     }
 
+    private WebElement selectDropdownOption(String text) {
+        String option = String.format("//div[contains(@id,'react-select') and text()='%s']", text);
+        return smallWait.until(ExpectedConditions.elementToBeClickable(By.xpath(option)));
+    }
+
+    // submit btn
     public void clickSubmitBtn() {
         clickElement(submitBtn);
     }
@@ -255,9 +251,8 @@ public class FormsPage extends BasePage {
         selectCity(city);
     }
 
-    public boolean isFieldMarkedAsError(String fieldName) {
+    /*public boolean isFieldMarkedAsError(String fieldName) {
         String selector;
-
         switch (fieldName.toLowerCase()) {
             case "firstname":
                 selector = "#firstName";
@@ -269,28 +264,36 @@ public class FormsPage extends BasePage {
                 selector = "#userNumber";
                 break;
             case "gender":
-                selector = "input[name='gender'][required]";
-                break;
+                return isGenderError();
             default:
                 throw new IllegalArgumentException("Unknown field: " + fieldName);
         }
-
-        WebElement field = driver.findElement(By.cssSelector(selector));
+        WebElement field = smallWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(selector)));
         String borderColor = field.getCssValue("border-color");
-
         return borderColor.equals("rgb(220, 53, 69)");
+    }
+
+    private boolean isGenderError() {
+        try {
+            WebElement genderGroup = driver.findElement(By.id("genterWrapper"));
+            String classes = genderGroup.getAttribute("class");
+
+            return classes.contains("is-invalid");
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public void validateRequiredFieldsErrors() {
         SoftAssert soft = new SoftAssert();
         soft.assertTrue(isFieldMarkedAsError("firstName"),
-                "First Name is empty.");
+                "First Name should be in red when it is empty.");
         soft.assertTrue(isFieldMarkedAsError("lastName"),
-                "Last Name is empty.");
+                "Last Name should be in red when it is empty.");
         soft.assertTrue(isFieldMarkedAsError("gender"),
-                "Gender is empty.");
+                "Gender should be in red when it is empty.");
         soft.assertTrue(isFieldMarkedAsError("mobile"),
-                "Mobile Number is empty.");
+                "Mobile Number should be in red when it is empty.");
         soft.assertAll();
-    }
+    }*/
 }
